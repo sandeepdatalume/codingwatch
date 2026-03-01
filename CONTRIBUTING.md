@@ -6,7 +6,7 @@ Thanks for your interest in contributing! This guide will help you get started.
 
 ```bash
 # Clone the repo
-git clone https://github.com/datalume-io/codingwatch.git
+git clone https://github.com/sandeepdatalume/codingwatch.git
 cd codingwatch
 
 # Create a virtual environment

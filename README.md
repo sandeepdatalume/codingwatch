@@ -2,7 +2,7 @@
 
 Real-time observability for AI coding agents.
 
-[![CI](https://github.com/datalume-io/codingwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/datalume-io/codingwatch/actions/workflows/ci.yml)
+[![CI](https://github.com/sandeepdatalume/codingwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeepdatalume/codingwatch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -38,7 +38,7 @@ GET /metrics (Prometheus) | GET /api/v1/export/otlp | GET /api/v1/stats (dashboa
 ### Local Setup
 
 ```bash
-git clone https://github.com/datalume-io/codingwatch.git
+git clone https://github.com/sandeepdatalume/codingwatch.git
 cd codingwatch
 ./setup.sh
 ```
@@ -158,7 +158,7 @@ For centralized metrics across a team, deploy the collector on a shared server a
 
 ```bash
 # On a VM, cloud instance, or k8s cluster
-git clone https://github.com/datalume-io/codingwatch.git
+git clone https://github.com/sandeepdatalume/codingwatch.git
 cd codingwatch
 docker compose --profile observability up -d
 ```

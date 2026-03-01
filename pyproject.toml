@@ -34,9 +34,9 @@ postgres = ["psycopg2-binary>=2.9.10"]
 dev = ["pytest>=8.3.0", "pytest-asyncio>=0.25.0", "ruff>=0.9.0"]
 
 [project.urls]
-Homepage = "https://github.com/datalume-io/codingwatch"
-Repository = "https://github.com/datalume-io/codingwatch"
-Issues = "https://github.com/datalume-io/codingwatch/issues"
+Homepage = "https://github.com/sandeepdatalume/codingwatch"
+Repository = "https://github.com/sandeepdatalume/codingwatch"
+Issues = "https://github.com/sandeepdatalume/codingwatch/issues"
 
 [tool.ruff]
 line-length = 120
