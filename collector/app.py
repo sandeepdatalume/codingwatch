@@ -22,6 +22,7 @@ _DASHBOARD_CANDIDATES = [
 ]
 
 # Logging setup
+Path(config.LOG_FILE).parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
