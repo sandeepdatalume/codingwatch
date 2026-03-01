@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codingwatch"
+version = "0.1.0"
+description = "Real-time observability for AI coding agents"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Datalume Contributors" }]
+keywords = ["observability", "metrics", "claude", "ai", "coding-agents"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "aiosqlite>=0.20.0",
+    "pydantic>=2.10.0",
+    "httpx>=0.28.0",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg2-binary>=2.9.10"]
+dev = ["pytest>=8.3.0", "pytest-asyncio>=0.25.0", "ruff>=0.9.0"]
+
+[project.urls]
+Homepage = "https://github.com/datalume-io/codingwatch"
+Repository = "https://github.com/datalume-io/codingwatch"
+Issues = "https://github.com/datalume-io/codingwatch/issues"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["collector"]

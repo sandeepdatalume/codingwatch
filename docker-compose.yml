@@ -1,0 +1,75 @@
+# Default credentials below are for local development only.
+# Change them before deploying to any shared or internet-facing environment.
+
+services:
+  collector:
+    build:
+      context: .
+      dockerfile: collector/Dockerfile
+    ports:
+      - "9876:9876"
+    environment:
+      - COLLECTOR_PORT=9876
+      - SQLITE_PATH=/data/metrics.db
+      - DATABASE_URL=postgresql://claude:claude@postgres:5432/claude_metrics
+      - LOG_FILE=/data/metrics-collector.log
+      # - OTLP_ENDPOINT=http://your-otlp-backend:4318/v1/metrics
+    volumes:
+      - collector-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=claude
+      - POSTGRES_PASSWORD=claude
+      - POSTGRES_DB=claude_metrics
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claude -d claude_metrics"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles:
+      - observability
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - collector
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles:
+      - observability
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  collector-data:
+  pg-data:
+  prometheus-data:
+  grafana-data:

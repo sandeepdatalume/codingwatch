@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>codingwatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #484f58;
+            --accent-green: #3fb950;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --accent-blue: #58a6ff;
+            --accent-purple: #bc8cff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header .status.connected { color: var(--accent-green); }
+        .header .status.disconnected { color: var(--accent-red); }
+
+        .error-banner {
+            display: none;
+            background: #f8514922;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 12px 32px;
+            font-size: 13px;
+        }
+
+        .error-banner.visible { display: block; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 24px 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-card .value.cost { color: var(--accent-yellow); }
+        .stat-card .value.sessions { color: var(--accent-green); }
+        .stat-card .value.tokens { color: var(--accent-blue); }
+        .stat-card .value.lines { color: var(--accent-purple); }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 32px 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+
+        .chart-card h3 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .chart-card canvas { max-height: 200px; }
+
+        .table-container {
+            padding: 0 32px 32px;
+            overflow-x: auto;
+        }
+
+        .table-container h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody tr:hover { background: var(--bg-tertiary); }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-dot.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 6px var(--accent-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.inactive { background: var(--text-muted); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .context-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .context-bar-track {
+            width: 80px;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .context-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .context-bar-fill.green { background: var(--accent-green); }
+        .context-bar-fill.yellow { background: var(--accent-yellow); }
+        .context-bar-fill.red { background: var(--accent-red); }
+
+        .cost-value { color: var(--accent-yellow); font-weight: 600; }
+        .lines-added { color: var(--accent-green); }
+        .lines-removed { color: var(--accent-red); }
+
+        .project-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: help;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p { margin-top: 8px; font-size: 13px; }
+
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .header { padding: 16px; }
+            .stats-grid, .charts-grid, .table-container { padding-left: 16px; padding-right: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>codingwatch</h1>
+    <span class="status" id="connStatus" role="status">Connecting...</span>
+</div>
+
+<div class="error-banner" id="errorBanner" role="alert"></div>
+
+<div class="stats-grid" aria-label="Summary statistics">
+    <div class="stat-card">
+        <div class="label">Total Cost</div>
+        <div class="value cost" id="totalCost">$0.00</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Active Sessions</div>
+        <div class="value sessions" id="activeSessions">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Input Tokens</div>
+        <div class="value tokens" id="totalInputTokens">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Output Tokens</div>
+        <div class="value tokens" id="totalOutputTokens">0</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>Cost History</h3>
+        <canvas id="costChart"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Context Usage</h3>
+        <canvas id="contextChart"></canvas>
+    </div>
+</div>
+
+<div class="table-container">
+    <h2>Sessions</h2>
+    <table aria-label="Claude Code sessions">
+        <thead>
+            <tr>
+                <th>Session</th>
+                <th>Status</th>
+                <th>Context</th>
+                <th>Cost</th>
+                <th>Lines</th>
+                <th>Duration</th>
+                <th>Project</th>
+            </tr>
+        </thead>
+        <tbody id="sessionsBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Config
+    const params = new URLSearchParams(window.location.search);
+    const API_BASE = params.get('api') || 'http://localhost:9876';
+    const REFRESH_MS = 10000;
+
+    // Chart setup
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: { color: '#8b949e', font: { family: 'JetBrains Mono', size: 10 } }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#484f58', font: { family: 'JetBrains Mono', size: 9 } },
+                grid: { color: '#21262d' }
+            },
+            y: {
+                ticks: { color: '#484f58', font: { family: 'JetBrains Mono', size: 9 } },
+                grid: { color: '#21262d' }
+            }
+        }
+    };
+
+    const costChart = new Chart(document.getElementById('costChart'), {
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+            ...chartDefaults,
+            scales: {
+                ...chartDefaults.scales,
+                y: { ...chartDefaults.scales.y, title: { display: true, text: 'USD', color: '#8b949e' } }
+            }
+        }
+    });
+
+    const contextChart = new Chart(document.getElementById('contextChart'), {
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+            ...chartDefaults,
+            scales: {
+                ...chartDefaults.scales,
+                y: {
+                    ...chartDefaults.scales.y,
+                    min: 0, max: 100,
+                    title: { display: true, text: '%', color: '#8b949e' }
+                }
+            }
+        }
+    });
+
+    // Helpers
+    function formatCost(usd) {
+        return '$' + (usd || 0).toFixed(2);
+    }
+
+    function formatDuration(ms) {
+        if (!ms) return '0s';
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return m > 0 ? m + 'm ' + (s % 60) + 's' : s + 's';
+    }
+
+    function formatTokens(n) {
+        if (!n) return '0';
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return n.toString();
+    }
+
+    function projectShort(path) {
+        if (!path) return '-';
+        const parts = path.split('/').filter(Boolean);
+        return parts.slice(-2).join('/');
+    }
+
+    function contextColor(pct) {
+        if (pct >= 90) return 'red';
+        if (pct >= 70) return 'yellow';
+        return 'green';
+    }
+
+    function isActive(lastSeen) {
+        if (!lastSeen) return false;
+        const diff = (Date.now() - new Date(lastSeen).getTime()) / 1000;
+        return diff < 600;
+    }
+
+    function timeAgo(lastSeen) {
+        if (!lastSeen) return 'unknown';
+        const diff = Math.floor((Date.now() - new Date(lastSeen).getTime()) / 1000);
+        if (diff < 60) return diff + 's ago';
+        const m = Math.floor(diff / 60);
+        if (m < 60) return m + 'm ago';
+        const h = Math.floor(m / 60);
+        return h + 'h ago';
+    }
+
+    const sessionColors = {};
+    const palette = ['#58a6ff', '#bc8cff', '#3fb950', '#d29922', '#f85149', '#79c0ff', '#d2a8ff', '#56d364'];
+    let colorIdx = 0;
+
+    function getColor(sessionId) {
+        if (!sessionColors[sessionId]) {
+            sessionColors[sessionId] = palette[colorIdx % palette.length];
+            colorIdx++;
+        }
+        return sessionColors[sessionId];
+    }
+
+    // Safe DOM helper: create element with text
+    function el(tag, text, className) {
+        const e = document.createElement(tag);
+        if (text != null) e.textContent = text;
+        if (className) e.className = className;
+        return e;
+    }
+
+    // Build a session table row safely using DOM methods
+    function buildSessionRow(s) {
+        const tr = document.createElement('tr');
+
+        // Session column: model name + truncated ID
+        const tdSession = document.createElement('td');
+        tdSession.appendChild(document.createTextNode((s.model_name || 'Unknown') + ' '));
+        const sidSpan = el('span', (s.session_id || '').substring(0, 8));
+        sidSpan.style.color = 'var(--text-muted)';
+        tdSession.appendChild(sidSpan);
+        tr.appendChild(tdSession);
+
+        // Status column
+        const tdStatus = document.createElement('td');
+        const active = isActive(s.last_seen);
+        const statusLabel = active ? 'Active' : timeAgo(s.last_seen);
+        const dot = el('span', null, 'status-dot ' + (active ? 'active' : 'inactive'));
+        dot.setAttribute('aria-label', statusLabel);
+        tdStatus.appendChild(dot);
+        tdStatus.appendChild(document.createTextNode(statusLabel));
+        tr.appendChild(tdStatus);
+
+        // Context column
+        const tdContext = document.createElement('td');
+        const pct = s.used_percentage || 0;
+        const color = contextColor(pct);
+        const barDiv = el('div', null, 'context-bar');
+        const trackDiv = el('div', null, 'context-bar-track');
+        const fillDiv = el('div', null, 'context-bar-fill ' + color);
+        fillDiv.style.width = Math.min(pct, 100) + '%';
+        trackDiv.appendChild(fillDiv);
+        barDiv.appendChild(trackDiv);
+        barDiv.appendChild(el('span', pct.toFixed(0) + '%'));
+        tdContext.appendChild(barDiv);
+        tr.appendChild(tdContext);
+
+        // Cost column
+        const tdCost = document.createElement('td');
+        tdCost.appendChild(el('span', formatCost(s.cost_usd), 'cost-value'));
+        tr.appendChild(tdCost);
+
+        // Lines column
+        const tdLines = document.createElement('td');
+        tdLines.appendChild(el('span', '+' + (s.lines_added || 0), 'lines-added'));
+        tdLines.appendChild(document.createTextNode(' / '));
+        tdLines.appendChild(el('span', '-' + (s.lines_removed || 0), 'lines-removed'));
+        tr.appendChild(tdLines);
+
+        // Duration column
+        tr.appendChild(el('td', formatDuration(s.duration_ms)));
+
+        // Project column
+        const tdProject = el('td', projectShort(s.project_dir || s.workspace_dir), 'project-cell');
+        tdProject.title = s.project_dir || s.workspace_dir || '';
+        tr.appendChild(tdProject);
+
+        return tr;
+    }
+
+    // Render
+    function render(data) {
+        const { sessions, aggregate, cost_history, context_history } = data;
+
+        // Stats
+        document.getElementById('totalCost').textContent = formatCost(aggregate.total_cost);
+        document.getElementById('activeSessions').textContent = aggregate.active_count;
+        document.getElementById('totalInputTokens').textContent = formatTokens(aggregate.total_input_tokens);
+        document.getElementById('totalOutputTokens').textContent = formatTokens(aggregate.total_output_tokens);
+
+        // Sessions table — safe DOM construction
+        const tbody = document.getElementById('sessionsBody');
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+        if (!sessions || sessions.length === 0) {
+            const tr = document.createElement('tr');
+            const td = el('td', null, 'empty-state');
+            td.setAttribute('colspan', '7');
+            td.appendChild(el('p', 'No sessions yet. Start a Claude Code session to see data.'));
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        } else {
+            sessions.forEach(function(s) {
+                tbody.appendChild(buildSessionRow(s));
+            });
+        }
+
+        // Cost chart
+        const costBySession = {};
+        (cost_history || []).slice().reverse().forEach(function(h) {
+            if (!costBySession[h.session_id]) costBySession[h.session_id] = [];
+            costBySession[h.session_id].push({ ts: h.ts, val: h.cost_usd });
+        });
+
+        const costDatasets = Object.entries(costBySession).map(function(entry) {
+            return {
+                label: entry[0].substring(0, 8),
+                data: entry[1].map(function(p) { return p.val; }),
+                borderColor: getColor(entry[0]),
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.3,
+            };
+        });
+
+        const maxPts = Math.max.apply(null, Object.values(costBySession).map(function(p) { return p.length; }).concat([0]));
+        costChart.data.labels = Array.from({ length: maxPts }, function() { return ''; });
+        costChart.data.datasets = costDatasets;
+        costChart.update('none');
+
+        // Context chart
+        const ctxBySession = {};
+        (context_history || []).slice().reverse().forEach(function(h) {
+            if (!ctxBySession[h.session_id]) ctxBySession[h.session_id] = [];
+            ctxBySession[h.session_id].push({ ts: h.ts, val: h.used_percentage });
+        });
+
+        const ctxDatasets = Object.entries(ctxBySession).map(function(entry) {
+            return {
+                label: entry[0].substring(0, 8),
+                data: entry[1].map(function(p) { return p.val; }),
+                borderColor: getColor(entry[0]),
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.3,
+            };
+        });
+
+        const maxCtxPts = Math.max.apply(null, Object.values(ctxBySession).map(function(p) { return p.length; }).concat([0]));
+        contextChart.data.labels = Array.from({ length: maxCtxPts }, function() { return ''; });
+        contextChart.data.datasets = ctxDatasets;
+        contextChart.update('none');
+    }
+
+    // Fetch loop
+    var connected = false;
+
+    async function fetchAndRender() {
+        try {
+            const resp = await fetch(API_BASE + '/api/v1/stats');
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            render(data);
+
+            if (!connected) {
+                connected = true;
+                var connEl = document.getElementById('connStatus');
+                connEl.textContent = 'Connected';
+                connEl.className = 'status connected';
+                document.getElementById('errorBanner').classList.remove('visible');
+            }
+        } catch (e) {
+            connected = false;
+            var connEl = document.getElementById('connStatus');
+            connEl.textContent = 'Disconnected';
+            connEl.className = 'status disconnected';
+            var banner = document.getElementById('errorBanner');
+            banner.textContent = 'Collector unreachable at ' + API_BASE + ' \u2014 check that the collector is running.';
+            banner.classList.add('visible');
+        }
+    }
+
+    // Initial fetch + interval
+    fetchAndRender();
+    setInterval(fetchAndRender, REFRESH_MS);
+</script>
+
+</body>
+</html>

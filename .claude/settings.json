@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_FILE_PATH\"; if [ -n \"$file\" ] && echo \"$file\" | grep -qE '\\.py$'; then python -m pytest collector/ -x -q 2>&1 | tail -5; fi",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_FILE_PATH\"; if [ -n \"$file\" ] && echo \"$file\" | grep -qE 'schema\\.json$'; then echo 'BLOCK: schema.json is the source of truth from Claude Code — do not modify it'; exit 1; fi",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
