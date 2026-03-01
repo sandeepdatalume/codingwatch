@@ -187,15 +187,12 @@ Then add the statusline to Claude Code settings (`~/.claude/settings.json`):
 
 That's it. All sessions from the team will flow into the central collector, with per-session breakdowns visible in the dashboard, Prometheus, and Grafana.
 
-> **Note:** The collector does not currently include authentication. For internet-facing deployments, put it behind a reverse proxy with auth (e.g., nginx + basic auth, or a VPN).
-
 ## Roadmap
 
 - [ ] **OpenCode integration** — plugin for [OpenCode](https://opencode.ai) that posts session metrics (cost, tokens, model) to the collector via `session.idle` / `session.updated` events
 - [ ] **Gemini CLI integration** — support for Google's Gemini CLI agent
 - [ ] **Aider integration** — support for [Aider](https://aider.chat) sessions
 - [ ] **Multi-agent dashboard** — unified view across different AI coding tools
-- [ ] **API key authentication** — bearer token auth for central deployments
 - [ ] **Cost alerts** — configurable thresholds with notifications
 
 ## License
