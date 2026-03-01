@@ -9,17 +9,17 @@ import uvicorn
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-# Resolve dashboard path (works from installed or repo location)
-_DASHBOARD_CANDIDATES = [
-    Path(__file__).resolve().parent.parent / "dashboard" / "index.html",
-    Path.home() / ".codingwatch" / "dashboard" / "index.html",
-]
-
 from collector import config
 from collector.db import close_db, get_all_sessions, get_dashboard_stats, ingest, init_db, init_pg
 from collector.models import MetricPayload
 from collector.otlp import build_otlp_payload, push_otlp
 from collector.prometheus import render_prometheus_metrics
+
+# Resolve dashboard path (works from installed or repo location)
+_DASHBOARD_CANDIDATES = [
+    Path(__file__).resolve().parent.parent / "dashboard" / "index.html",
+    Path.home() / ".codingwatch" / "dashboard" / "index.html",
+]
 
 # Logging setup
 logging.basicConfig(
