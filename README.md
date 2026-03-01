@@ -6,6 +6,8 @@ Real-time observability for AI coding agents.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
+![codingwatch dashboard](docs/screenshot.png)
+
 ---
 
 ## Features
