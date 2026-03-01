@@ -10,7 +10,7 @@ Real-time observability for AI coding agents.
 
 ## Features
 
-- **Live metrics collection** — captures session data via Claude Code's statusline hook
+- **Live metrics collection** — captures session data from AI coding agents (Claude Code supported, OpenCode and others planned)
 - **Prometheus export** — `/metrics` endpoint with per-session gauges
 - **OTLP/HTTP export** — pull via `/api/v1/export/otlp` or push to any OTLP backend
 - **Single-file dashboard** — real-time session overview, no build step required
@@ -147,6 +147,14 @@ codingwatch/
 ├── setup.sh                # One-command local setup
 └── pyproject.toml
 ```
+
+## Roadmap
+
+- [ ] **OpenCode integration** — plugin for [OpenCode](https://opencode.ai) that posts session metrics (cost, tokens, model) to the collector via `session.idle` / `session.updated` events
+- [ ] **Gemini CLI integration** — support for Google's Gemini CLI agent
+- [ ] **Aider integration** — support for [Aider](https://aider.chat) sessions
+- [ ] **Multi-agent dashboard** — unified view across different AI coding tools
+- [ ] **Cost alerts** — configurable thresholds with notifications
 
 ## License
 
