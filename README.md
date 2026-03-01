@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/sandeepdatalume/codingwatch/main/in
 
 That's it. This clones the repo, installs dependencies, configures Claude Code's statusline, and starts the collector. Restart any running Claude Code sessions to start collecting metrics.
 
-Open the dashboard at `~/.codingwatch/dashboard/index.html`.
+The dashboard opens automatically at `http://localhost:9876`.
 
 ### Docker Compose
 
@@ -53,7 +53,7 @@ docker compose --profile observability up -d      # + Prometheus + Grafana
 | Service     | URL                          |
 |-------------|------------------------------|
 | Collector   | http://localhost:9876         |
-| Dashboard   | Open `dashboard/index.html`  |
+| Dashboard   | http://localhost:9876         |
 | Prometheus  | http://localhost:9090         |
 | Grafana     | http://localhost:3000         |
 

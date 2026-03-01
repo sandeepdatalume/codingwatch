@@ -298,7 +298,8 @@
 <script>
     // Config
     const params = new URLSearchParams(window.location.search);
-    const API_BASE = params.get('api') || 'http://localhost:9876';
+    const origin = window.location.origin;
+    const API_BASE = params.get('api') || (origin && origin !== 'null' ? origin : 'http://localhost:9876');
     const REFRESH_MS = 10000;
 
     // Chart setup

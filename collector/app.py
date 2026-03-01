@@ -3,10 +3,17 @@
 import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+
+# Resolve dashboard path (works from installed or repo location)
+_DASHBOARD_CANDIDATES = [
+    Path(__file__).resolve().parent.parent / "dashboard" / "index.html",
+    Path.home() / ".codingwatch" / "dashboard" / "index.html",
+]
 
 from collector import config
 from collector.db import close_db, get_all_sessions, get_dashboard_stats, ingest, init_db, init_pg
@@ -105,6 +112,15 @@ async def otlp_export():
     sessions = await get_all_sessions()
     payload = build_otlp_payload(sessions)
     return payload
+
+
+@app.get("/", response_class=Response)
+async def dashboard():
+    """Serve the live dashboard."""
+    for path in _DASHBOARD_CANDIDATES:
+        if path.is_file():
+            return Response(content=path.read_text(), media_type="text/html")
+    return Response(content="Dashboard not found", status_code=404, media_type="text/plain")
 
 
 @app.get("/health")

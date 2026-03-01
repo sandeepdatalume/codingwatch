@@ -115,13 +115,20 @@ else
     exit 1
 fi
 
-# 8. Done
+# 8. Open dashboard in browser
+DASHBOARD_URL="http://localhost:9876"
+if command -v open &>/dev/null; then
+    open "$DASHBOARD_URL"
+elif command -v xdg-open &>/dev/null; then
+    xdg-open "$DASHBOARD_URL"
+fi
+
+# 9. Done
 echo ""
 echo "=== codingwatch installed ==="
 echo ""
-echo "  Dashboard:  file://$INSTALL_DIR/dashboard/index.html"
-echo "  Collector:  http://localhost:9876"
-echo "  Health:     curl http://localhost:9876/health"
+echo "  Dashboard:  $DASHBOARD_URL"
+echo "  Health:     curl $DASHBOARD_URL/health"
 echo ""
 echo "Restart any running Claude Code sessions to start collecting metrics."
 echo ""
