@@ -35,30 +35,13 @@ GET /metrics (Prometheus) | GET /api/v1/export/otlp | GET /api/v1/stats (dashboa
 
 ## Quick Start
 
-### Local Setup
-
 ```bash
-git clone https://github.com/sandeepdatalume/codingwatch.git
-cd codingwatch
-./setup.sh
+curl -fsSL https://raw.githubusercontent.com/sandeepdatalume/codingwatch/main/install.sh | bash
 ```
 
-This will:
-1. Create a Python virtual environment and install dependencies
-2. Copy the statusline script to `~/.claude/`
-3. Start the collector on `http://localhost:9876`
+That's it. This clones the repo, installs dependencies, configures Claude Code's statusline, and starts the collector. Restart any running Claude Code sessions to start collecting metrics.
 
-Then configure Claude Code to use the statusline:
-
-```json
-// ~/.claude/settings.json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh"
-  }
-}
-```
+Open the dashboard at `~/.codingwatch/dashboard/index.html`.
 
 ### Docker Compose
 
@@ -165,29 +148,15 @@ docker compose --profile observability up -d
 
 **2. Each developer — one-time setup:**
 
-Copy the statusline script and point it at the central server:
-
 ```bash
-# Copy the script
-cp statusline/statusline.sh ~/.claude/statusline.sh
-chmod +x ~/.claude/statusline.sh
+# Install codingwatch locally (configures Claude Code automatically)
+curl -fsSL https://raw.githubusercontent.com/sandeepdatalume/codingwatch/main/install.sh | bash
 
-# Set the central collector URL (add to your shell profile)
-export CLAUDE_METRICS_URL=https://metrics.yourcompany.com/metrics
+# Point at the central collector (add to your shell profile)
+echo 'export CLAUDE_METRICS_URL=https://metrics.yourcompany.com/metrics' >> ~/.zshrc
 ```
 
-Then add the statusline to Claude Code settings (`~/.claude/settings.json`):
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh"
-  }
-}
-```
-
-That's it. All sessions from the team will flow into the central collector, with per-session breakdowns visible in the dashboard, Prometheus, and Grafana.
+All sessions from the team will flow into the central collector, with per-session breakdowns visible in the dashboard, Prometheus, and Grafana.
 
 ## Roadmap
 
