@@ -37,6 +37,9 @@ Homepage = "https://github.com/sandeepdatalume/codingwatch"
 Repository = "https://github.com/sandeepdatalume/codingwatch"
 Issues = "https://github.com/sandeepdatalume/codingwatch/issues"
 
+[tool.setuptools.packages.find]
+include = ["collector*"]
+
 [tool.ruff]
 line-length = 120
 target-version = "py310"
