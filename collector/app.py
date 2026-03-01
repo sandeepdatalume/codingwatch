@@ -116,7 +116,7 @@ async def health():
 if __name__ == "__main__":
     uvicorn.run(
         "collector.app:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=config.COLLECTOR_PORT,
         log_level=config.LOG_LEVEL.lower(),
     )

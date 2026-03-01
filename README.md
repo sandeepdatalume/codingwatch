@@ -148,12 +148,54 @@ codingwatch/
 └── pyproject.toml
 ```
 
+## Team / Org Deployment
+
+For centralized metrics across a team, deploy the collector on a shared server and point each developer's statusline at it.
+
+**1. Deploy the central collector:**
+
+```bash
+# On a VM, cloud instance, or k8s cluster
+git clone https://github.com/datalume-io/codingwatch.git
+cd codingwatch
+docker compose --profile observability up -d
+```
+
+**2. Each developer — one-time setup:**
+
+Copy the statusline script and point it at the central server:
+
+```bash
+# Copy the script
+cp statusline/statusline.sh ~/.claude/statusline.sh
+chmod +x ~/.claude/statusline.sh
+
+# Set the central collector URL (add to your shell profile)
+export CLAUDE_METRICS_URL=https://metrics.yourcompany.com/metrics
+```
+
+Then add the statusline to Claude Code settings (`~/.claude/settings.json`):
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
+}
+```
+
+That's it. All sessions from the team will flow into the central collector, with per-session breakdowns visible in the dashboard, Prometheus, and Grafana.
+
+> **Note:** The collector does not currently include authentication. For internet-facing deployments, put it behind a reverse proxy with auth (e.g., nginx + basic auth, or a VPN).
+
 ## Roadmap
 
 - [ ] **OpenCode integration** — plugin for [OpenCode](https://opencode.ai) that posts session metrics (cost, tokens, model) to the collector via `session.idle` / `session.updated` events
 - [ ] **Gemini CLI integration** — support for Google's Gemini CLI agent
 - [ ] **Aider integration** — support for [Aider](https://aider.chat) sessions
 - [ ] **Multi-agent dashboard** — unified view across different AI coding tools
+- [ ] **API key authentication** — bearer token auth for central deployments
 - [ ] **Cost alerts** — configurable thresholds with notifications
 
 ## License
