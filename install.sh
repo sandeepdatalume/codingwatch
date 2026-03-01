@@ -11,6 +11,23 @@ PID_FILE="$CLAUDE_DIR/metrics-collector.pid"
 LOG_FILE="$CLAUDE_DIR/metrics-collector.log"
 REPO="https://github.com/sandeepdatalume/codingwatch.git"
 
+# On first run (e.g. curl | bash), fetch the latest code then re-exec
+# from the local copy so script updates take effect immediately.
+if [ -z "${CODINGWATCH_REEXEC:-}" ]; then
+    if ! command -v git &>/dev/null; then
+        echo "ERROR: git not found."
+        exit 1
+    fi
+    if [ -d "$INSTALL_DIR/.git" ]; then
+        git -C "$INSTALL_DIR" pull --quiet
+    else
+        rm -rf "$INSTALL_DIR"
+        git clone --quiet "$REPO" "$INSTALL_DIR"
+    fi
+    export CODINGWATCH_REEXEC=1
+    exec bash "$INSTALL_DIR/install.sh"
+fi
+
 echo "=== codingwatch installer ==="
 echo ""
 
@@ -35,7 +52,7 @@ if ! command -v git &>/dev/null; then
     exit 1
 fi
 
-# 2. Clone or update repo
+# 2. Ensure repo is up to date
 if [ -d "$INSTALL_DIR/.git" ]; then
     echo "Updating existing installation..."
     git -C "$INSTALL_DIR" pull --quiet
